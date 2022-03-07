@@ -41,20 +41,23 @@
                 webprint.openPort($("#portlist option:first-child").val(), {baud:"9600", databits:"8", stopbits:"1", parity:"1", flow:"none"});
         };
 
-        webprint = new WebPrint(true, {
-            relayHost: "127.0.0.1",
-            relayPort: "8080",
-            listPrinterCallback: populatePrinters,
-            listPortsCallback: populatePorts,
-            readyCallback: function(){
-                webprint.requestPorts();
-                webprint.requestPrinters();
-                getESCPImageString("https://wallaceit.com.au/webprint/wallaceit_receipt_logo.png", function (imgdata) {
-                    imgData = imgdata;
-                    console.log("image loaded");
-                });
-            }
-        });
+        $(function(){
+
+            webprint = new WebPrint(true, {
+                relayHost: "127.0.0.1",
+                relayPort: "8080",
+                listPrinterCallback: populatePrinters,
+                listPortsCallback: populatePorts,
+                readyCallback: function(){
+                    webprint.requestPorts();
+                    webprint.requestPrinters();
+                    //getESCPImageString("https://wallaceit.com.au/webprint/wallaceit_receipt_logo.png", function (imgdata) {
+                    //    imgData = imgdata;
+                    //    console.log("image loaded");
+                    //});
+                }
+            });
+        })
 
         // ESC/P receipt generation
         var imgData = '';
