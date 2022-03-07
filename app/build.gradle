@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4'
+        classpath 'com.android.tools.build:gradle:7.1.1'
     }
 }
 
@@ -27,7 +27,7 @@ android {
     }
     signingConfigs {
         debug {
-            storeFile file('/home/michael/.android/debug.keystore')
+            storeFile file('/Users/ohsungjae/.android/debug.keystore')
             keyAlias 'androiddebugkey'
             keyPassword 'android'
             storePassword 'android'
