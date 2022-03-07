@@ -109,7 +109,7 @@ public class RelayService extends Service {
             mBuilder = new Notification.Builder(this);
         }
 
-        mBuilder.setSmallIcon(R.drawable.icon)
+        mBuilder.setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(getString(R.string.server_running))
                 .setContentText(getString(R.string.print_server_running));
 
