@@ -16,7 +16,7 @@
  * details.
  *
  */
-package au.com.wallaceit.webprint;
+package app.com.trizeconsulting.webprint;
 
 import android.app.Application;
 import android.content.SharedPreferences;

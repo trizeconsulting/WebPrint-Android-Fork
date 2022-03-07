@@ -16,14 +16,13 @@
  * details.
  *
  */
-package au.com.wallaceit.webprint;
+package app.com.trizeconsulting.webprint;
 
 import android.content.SharedPreferences;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 
