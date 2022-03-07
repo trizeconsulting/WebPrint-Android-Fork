@@ -1,4 +1,4 @@
-package au.com.wallaceit.webprint;
+package app.com.trizeconsulting.webprint;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -6,18 +6,24 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.os.Build;
 
 public class MainActivity extends Activity {
     private WebPrint app;
@@ -25,6 +31,38 @@ public class MainActivity extends Activity {
     private TextView stattxt;
     private EditText sourceport;
     private ListView aclListview;
+    private CheckBox checkboxStart;
+
+    public static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 5469;
+
+    public boolean checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(this)) {
+
+                AlertDialog.Builder authAlert = new AlertDialog.Builder(this);
+                authAlert.setTitle("Notification");
+                authAlert.setMessage("Allow this app to appear on top of other apps you are using.");
+                authAlert.setNeutralButton("Setting", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Uri uri = Uri.fromParts("package" , getPackageName(), null);
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, uri);
+                        startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+                    }
+                });
+                authAlert.setCancelable(false);
+                authAlert.create();
+                authAlert.show();
+
+
+            }else{
+                return true;
+            }
+        }else{
+            return true;
+        }
+        return false;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +87,12 @@ public class MainActivity extends Activity {
                 app.preferences.edit().putString("prefsourceport", sourceport.getText().toString()).apply();
             }
         });
+
+        //permission
+        checkPermission();
+        //Start WebPrint On System start
+        checkboxStart = findViewById(R.id.checkbox_start);
+        checkboxStart.setChecked(app.preferences.getBoolean("prefStartYn", true));
 
         boolean serverstarted = isServiceRunning(RelayService.class);
         setButton(serverstarted);
@@ -98,11 +142,14 @@ public class MainActivity extends Activity {
     }
 
     public void startService(){
-        Intent sintent = new Intent(MainActivity.this, RelayService.class);
-        sintent.putExtra("sourceport", ((TextView) findViewById(R.id.sourceport)).getText().toString());
-        startService(sintent);
-        // set new button click
-        setButton(true);
+        boolean chkPermission = checkPermission();
+        if(chkPermission){
+            Intent sintent = new Intent(MainActivity.this, RelayService.class);
+            sintent.putExtra("sourceport", ((TextView) findViewById(R.id.sourceport)).getText().toString());
+            startService(sintent);
+            // set new button click
+            setButton(true);
+        }
     }
 
     public void stopService(){
@@ -152,4 +199,17 @@ public class MainActivity extends Activity {
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
+    public void onCheckboxStartClick(View view) {
+        boolean checked = ((CheckBox) view).isChecked();
+
+        switch(view.getId()) {
+            case R.id.checkbox_start:
+                if (checked){
+                    app.preferences.edit().putBoolean("prefStartYn", true).apply();
+                }else{
+                    app.preferences.edit().putBoolean("prefStartYn", false).apply();
+                }
+                break;
+        }
+    }
 }
