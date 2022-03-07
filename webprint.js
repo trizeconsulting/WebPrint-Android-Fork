@@ -1,6 +1,6 @@
 /**
  * This file is part of WebPrint
- * 
+ *
  * @author Michael Wallace
  *
  * Copyright (C) 2015 Michael Wallace, WallaceIT
@@ -40,7 +40,7 @@ var WebPrint = function (init, opt) {
         var request = {a: "printraw", port: port, data: btoa(data)};
         sendAppletRequest(request);
     };
-    
+
     this.printTcp = function (data, socket) {
         var request = {a: "printraw", socket: socket, data: btoa(data)};
         sendAppletRequest(request);
@@ -79,18 +79,13 @@ var WebPrint = function (init, opt) {
             if (wpready){
                openPrintWindow();
             } else {
-               webprint.checkRelay();
-               console.log("Print applet connection not established...trying to reconnect");
+                retry = true;
+                checkRelay();
+                console.log("Print applet connection not established...trying to reconnect");
             }
             setTimeout(function () {
                 wpwindow.postMessage(JSON.stringify(data), "*");
             }, 220);
-            return;
-        }
-        //freshka 2021-12-29
-        if (wpwindow && wpfreeze) {
-            wpwindow.focus();
-            wpfreeze = false;
         }
         wpwindow.postMessage(JSON.stringify(data), "*");
     }
@@ -99,22 +94,48 @@ var WebPrint = function (init, opt) {
     var wpready = false;
     function openPrintWindow() {
         wpready = false;
-        wpwindow = window.open("http://"+options.relayHost+":"+options.relayPort+"/printwindow", 'WebPrintService');
-        wpwindow.blur();
-        window.focus();
+        if($("#ifmWebPrint").length > 0){
+            var ifm = $("#ifmWebPrint").attr("src", "http://"+options.relayHost+":"+options.relayPort+"/printwindow");
+
+            ifm.load(function(){
+                console.log("reload print...");
+                wpwindow =  document.getElementById( 'ifmWebPrint' ).contentWindow;
+            });
+        }else{
+            var ifm = $("<iframe>").attr({
+                "id": "ifmWebPrint",
+                "src": "http://"+options.relayHost+":"+options.relayPort+"/printwindow",
+            }).hide();
+
+            $("body").append(ifm);
+
+            wpwindow =  document.getElementById( 'ifmWebPrint' ).contentWindow;
+
+        }
+
+        // wpwindow = window.open("http://"+options.relayHost+":"+options.relayPort+"/printwindow", 'WebPrintService');
+        // if (wpwindow)
+        //     wpwindow.blur();
+        // window.focus();
     }
 
+    this.checkConnection = function () {
+        retry = true;
+        checkRelay();
+    };
+
     var wptimeOut;
-    this.checkRelay = function () {
+    var retry = true;
+    function checkRelay() {
         if (wpwindow && !wpwindow.closed) {
             wpwindow.close();
         }
         window.addEventListener("message", handleWebPrintMessage, false);
         openPrintWindow();
         wptimeOut = setTimeout(dispatchWebPrint, 2000);
-    };
+        retry = false; // prevent reconnection after one attempt, until user initiates it
+    }
 
-    var wpfreeze = false; //freshka 2021-12-29
     function handleWebPrintMessage(event) {
         if (event.origin != "http://"+options.relayHost+":"+options.relayPort)
             return;
@@ -125,7 +146,6 @@ var WebPrint = function (init, opt) {
                 sendAppletRequest({a:"init"});
                 break;
             case "response":
-                if (!event.data.json) return; //freshka 2021-12-29
                 var response = JSON.parse(event.data.json);
                 if (response.hasOwnProperty('ports')) {
                     if (options.listPortsCallback instanceof Function)
@@ -144,11 +164,9 @@ var WebPrint = function (init, opt) {
                     if (options.readyCallback instanceof Function) options.readyCallback();
                 }
                 break;
-            case "freeze": //freshka 2021-12-29
-				wpfreeze = true;
-                break;
             case "error": // cannot contact print applet from relay window
-                webprint.checkRelay();
+                if (retry)
+                    checkRelay();
         }
         //alert("The Web Printing service has been loaded in a new tab, keep it open for faster printing.");
     }
@@ -160,12 +178,16 @@ var WebPrint = function (init, opt) {
                 deployAndroid();
                 return;
             }
-            var installFile="WebPrint.jar";
-            if (navigator.appVersion.indexOf("Win")!=-1) installFile="WebPrint_windows_1_1.exe";
-            if (navigator.appVersion.indexOf("Mac")!=-1) installFile="WebPrint_macos_1_1.dmg";
-            if (navigator.appVersion.indexOf("X11")!=-1) installFile="WebPrint_unix_1_1.sh";
-            if (navigator.appVersion.indexOf("Linux")!=-1) installFile="WebPrint_unix_1_1.sh";
-            window.open("https://content.wallaceit.com.au/webprint/"+installFile, '_blank');
+//                var installFile="WebPrint.jar";
+            if (navigator.appVersion.indexOf("Win")!=-1) {
+                var installFile="WebPrint_windows_1_1_3.exe";
+                window.open("https://my.letuseat.net/webprint/installer/"+installFile, '_blank');
+            }else{
+                // not support
+            }
+//            if (navigator.appVersion.indexOf("Mac")!=-1) installFile="WebPrint_macos_1_1_1.dmg";
+//            if (navigator.appVersion.indexOf("X11")!=-1) installFile="WebPrint_unix_1_1_1.sh";
+//            if (navigator.appVersion.indexOf("Linux")!=-1) installFile="WebPrint_unix_1_1_1.sh";
         }
     }
 
@@ -175,7 +197,7 @@ var WebPrint = function (init, opt) {
         } else {
             deployAndroidFirefox();
         }
-        //document.location.href = "intent://#Intent;scheme=webprint;package=au.com.wallaceit.webprint;S.browser_fallback_url=https%3A%2F%2Fwallaceit.com.au%2Fplaystore%2Fwebprint;end";
+        //document.location.href = "intent://#Intent;scheme=webprint;package=app.com.trizeconsulting.webprint;S.browser_fallback_url=https%3A%2F%2Fwallaceit.com.au%2Fplaystore%2Fwebprint;end";
     }
 
     function isAndroidIntentSupported() {
@@ -190,14 +212,14 @@ var WebPrint = function (init, opt) {
 
     function deployAndroidChrome(){
         // this link needs to be clicked by the user
-        var html = '<div id="intent_link" style="position: fixed; top:40%; width: 120px; background-color: white; left:50%; margin-left: -60px; border: solid 2px rgb(75, 75, 75); font-family: Helvetica SansSerif sans-serif; text-align: center; padding: 5px;">' +
-            '<a onclick="window.location=\'intent://#Intent;scheme=webprint;package=au.com.wallaceit.webprint;S.browser_fallback_url=https%3A%2F%2Fwallaceit.com.au%2Fplaystore%2Fwebprint;end\'; document.getElementById(\'intent_link\').remove();">Click To Open WebPrint</a></div>';
-        document.body.innerHTML += html;
+        document.body.innerHTML += '<div id="intent_link" style="position: fixed; top:40%; width: 120px; background-color: white; left:50%; margin-left: -60px; border: solid 2px rgb(75, 75, 75); font-family: Helvetica SansSerif sans-serif; text-align: center; padding: 5px;">' +
+            '<a onclick="window.location=\'intent://#Intent;scheme=webprint;package=app.com.trizeconsulting.webprint;S.browser_fallback_url=https%3A%2F%2Fwallaceit.com.au%2Fplaystore%2Fwebprint;end\'; document.getElementById(\'intent_link\').remove();">Click To Open WebPrint</a></div>';
     }
 
     function deployAndroidFirefox() {
         var timeout = setTimeout(function() {
-            window.location = "https://wallaceit.com.au/playstore/webprint";
+            alert("play store url...");
+//            window.location = "https://wallaceit.com.au/playstore/webprint";
         }, 1000);
         window.addEventListener("pagehide", function(evt) {
             clearTimeout(timeout);
@@ -205,7 +227,7 @@ var WebPrint = function (init, opt) {
 
         window.location = "webprint://open";
     }
-    
+
     var cookie = localStorage.getItem("webprint_auth");
     if (cookie==null){
         cookie = "";
@@ -213,11 +235,7 @@ var WebPrint = function (init, opt) {
 
     var isAndroid = navigator.appVersion.indexOf("Android")!=-1;
 
-    if (init) this.checkRelay();
-    
+    if (init) checkRelay();
+
     return this;
 };
-
-
-
-
