@@ -23,7 +23,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 32
         versionCode 3
-        versionName "0.92"
+        versionName "0.1"
     }
     signingConfigs {
         debug {
