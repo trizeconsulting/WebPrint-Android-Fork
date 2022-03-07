@@ -16,7 +16,7 @@
  * details.
  *
  */
-package app.com.trizeconsulting.webprint;
+package app.com.trizesolutions.webprint;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -36,7 +36,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Base64;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,7 +95,7 @@ public class RelayService extends Service {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            String NOTIFICATION_CHANNEL_ID = "com.trizeconsulting.webprint";
+            String NOTIFICATION_CHANNEL_ID = "com.trizesolutions.webprint";
             String channelName = "WebPrint Service";
             NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
             chan.setLightColor(Color.BLUE);
@@ -109,7 +108,7 @@ public class RelayService extends Service {
             mBuilder = new Notification.Builder(this);
         }
 
-        mBuilder.setSmallIcon(R.mipmap.ic_launcher)
+        mBuilder.setSmallIcon(R.mipmap.ic_print)
                 .setContentTitle(getString(R.string.server_running))
                 .setContentText(getString(R.string.print_server_running));
 

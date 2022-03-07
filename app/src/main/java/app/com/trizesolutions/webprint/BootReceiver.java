@@ -1,11 +1,10 @@
-package app.com.trizeconsulting.webprint;
+package app.com.trizesolutions.webprint;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 
 public class BootReceiver extends BroadcastReceiver {
     private WebPrint app;

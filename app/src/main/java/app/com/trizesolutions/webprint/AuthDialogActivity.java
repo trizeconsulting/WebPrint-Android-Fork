@@ -16,7 +16,7 @@
  * details.
  *
  */
-package app.com.trizeconsulting.webprint;
+package app.com.trizesolutions.webprint;
 
 import android.app.Activity;
 import android.app.AlertDialog;

@@ -16,7 +16,7 @@
  * details.
  *
  */
-package app.com.trizeconsulting.webprint;
+package app.com.trizesolutions.webprint;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,7 +25,7 @@ import android.hardware.usb.UsbManager;
 import android.util.Log;
 
 public class UsbReceiver extends BroadcastReceiver {
-    public static final String ACTION_USB_PERMISSION = "app.com.trizeconsulting.webprint.USB_PERMISSION";
+    public static final String ACTION_USB_PERMISSION = "app.com.trizesolutions.webprint.USB_PERMISSION";
 
     public UsbReceiver() {
     }

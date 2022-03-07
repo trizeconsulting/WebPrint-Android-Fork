@@ -16,7 +16,7 @@
  * details.
  *
  */
-package app.com.trizeconsulting.webprint;
+package app.com.trizesolutions.webprint;
 
 import android.content.SharedPreferences;
 

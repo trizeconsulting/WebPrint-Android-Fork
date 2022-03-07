@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.com.trizeconsulting.webprint">
+    package="app.com.trizesolutions.webprint">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -8,13 +8,13 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
-        android:name=".WebPrint"
+        android:name="app.com.trizesolutions.webprint.WebPrint"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_print"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="app.com.trizesolutions.webprint.MainActivity"
             android:label="@string/app_name"
             android:exported="true">
             <intent-filter>
@@ -30,25 +30,25 @@
         </activity>
 
         <service
-            android:name=".RelayService"
+            android:name="app.com.trizesolutions.webprint.RelayService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".AuthDialogActivity"
+            android:name="app.com.trizesolutions.webprint.AuthDialogActivity"
             android:theme="@android:style/Theme.Dialog"
             android:permission="android.permission.SYSTEM_ALERT_WINDOW"
             />
 
         <receiver
-            android:name=".UsbReceiver"
+            android:name="app.com.trizesolutions.webprint.UsbReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="app.com.trizeconsulting.webprint.USB_PERMISSION"/>
+                <action android:name="app.com.trizesolutions.webprint.USB_PERMISSION"/>
             </intent-filter>
         </receiver>
-        <receiver android:name=".BootReceiver"
+        <receiver android:name="app.com.trizesolutions.webprint.BootReceiver"
             android:exported="false"
             android:enabled="true"
             android:label="BootReceiver"
