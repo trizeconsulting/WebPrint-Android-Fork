@@ -213,7 +213,7 @@ var WebPrint = function (init, opt) {
     function deployAndroidChrome(){
         // this link needs to be clicked by the user
                 var html = '<div id="intent_link" style="position: fixed; top:40%; width: 120px; background-color: white; left:50%; margin-left: -60px; border: solid 2px rgb(75, 75, 75); font-family: Helvetica SansSerif sans-serif; text-align: center; padding: 5px;">' +
-                    '<a onclick="window.location=\'intent://trize#Intent;scheme=webprint;category=android.intent.category.BROWSABLE;package=com.trizesolutions.webprint;S.browser_fallback_url=https://play.google.com;end\'; document.getElementById(\'intent_link\').remove();">Click To Open WebPrint</a></div>';
+                    '<a onclick="window.location=\'intent://trize#Intent;scheme=webprint;category=android.intent.category.BROWSABLE;package=com.trizesolutions.webprint;S.browser_fallback_url=https://play.google.com/store/apps/details?id=app.com.trizesolutions.webprint;end\'; document.getElementById(\'intent_link\').remove();">Click To Open WebPrint</a></div>';
                 document.body.innerHTML += html;
     }
 
