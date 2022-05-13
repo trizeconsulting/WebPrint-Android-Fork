@@ -22,13 +22,13 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 32
-        versionCode 3
-        versionName "0.1"
+        versionCode 4
+        versionName "0.2"
     }
     signingConfigs {
         debug {
-            storeFile file('/Users/ohsungjae/.android/debug.keystore')
-            keyAlias 'androiddebugkey'
+            storeFile file('D:/TRIZE/projects/TABLE_ORDER/workspace_git/remote/WebPrint-Android-Fork/app/debug.keystore')
+            keyAlias 'androiddebugkey2'
             keyPassword 'android'
             storePassword 'android'
         }
