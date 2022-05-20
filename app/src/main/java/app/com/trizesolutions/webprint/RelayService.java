@@ -186,10 +186,9 @@ public class RelayService extends Service {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                 s = device.getProductName();
             }
+            s = s.trim();
             System.out.println("Usb Printer added to list: " + s);
             usbPrinters.put(s, device);
-
-
         }
     }
 
@@ -199,7 +198,7 @@ public class RelayService extends Service {
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> bluetoothDevicesList = bluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : bluetoothDevicesList) {
-            String s = device.getName();
+            String s = device.getName().trim();
             boolean deviceIsPrinter = false;
             int majDeviceCl = device.getBluetoothClass().getMajorDeviceClass(),
                     deviceCl = device.getBluetoothClass().getDeviceClass();
