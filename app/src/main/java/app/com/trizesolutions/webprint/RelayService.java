@@ -50,6 +50,7 @@ import org.json.JSONObject;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -321,6 +322,20 @@ public class RelayService extends Service {
                                 }
                                 if (action.equals("printraw")) {
                                     byte[] data = Base64.decode(request.getString("data"), Base64.DEFAULT);
+
+                                    // 한글 처리 freshka 2022.07.14
+                                    if (request.has("encoding")) {
+                                        String encoding = request.getString("encoding");
+                                        if (null != encoding || !"".equals(encoding)) {
+                                            try {
+                                                String dataStr = new String(data);
+                                                data = dataStr.getBytes(encoding);
+                                            } catch (UnsupportedEncodingException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+
                                     if (request.has("printer")) {
                                         String printerName = request.getString("printer");
                                         if (usbPrinters.containsKey(printerName)) {
