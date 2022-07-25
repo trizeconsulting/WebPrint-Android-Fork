@@ -18,6 +18,7 @@
  */
 package app.com.trizesolutions.webprint;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -31,6 +32,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
@@ -70,6 +72,7 @@ public class RelayService extends Service {
     public static final Object authLock = new Object();
     public static boolean authResult = false;
 
+    private BluetoothAdapter bluetoothAdapter; //freshka 2022.07.23
     private HashMap<String, BluetoothDevice> bluetoothPrinters;
 
     public RelayService() {
@@ -79,6 +82,7 @@ public class RelayService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter(); //freshka 2022.07.23
         app = (WebPrint) getApplicationContext();
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
@@ -196,7 +200,7 @@ public class RelayService extends Service {
     @SuppressLint("MissingPermission")
     public void refreshBluetoothDevices() {
         bluetoothPrinters = new HashMap<>();
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         Set<BluetoothDevice> bluetoothDevicesList = bluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : bluetoothDevicesList) {
             String s = device.getName().trim();
@@ -212,6 +216,9 @@ public class RelayService extends Service {
             if (deviceIsPrinter) {
                 System.out.println("Bluetooth Printer added to list: " + s);
                 bluetoothPrinters.put(s, device);
+                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    System.out.println("Bluetooth Printer Alias added to list: " + device.getAlias().trim());
+                }*/
             }
         }
     }
@@ -314,11 +321,37 @@ public class RelayService extends Service {
                                     for (String s : usbPrinters.keySet()) {
                                         deviceArr.put(s);
                                     }
-                                    refreshBluetoothDevices();
-                                    for (String s : bluetoothPrinters.keySet()) {
-                                        deviceArr.put(s);
+
+                                    //refreshBluetoothDevices 권한 인증 freshka 2022.07.23
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { //Android 12 이상....
+                                        if (app.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                                            Intent intent = new Intent(RelayService.this, BluetoothAuthDialogActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                                            startActivity(intent);
+                                            synchronized (authLock) {
+                                                try {
+                                                    authLock.wait();
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                        else {
+                                            authResult = true;
+                                        }
                                     }
-                                    responseJson.put("printers", deviceArr);
+                                    else {
+                                        authResult = true;
+                                    }
+
+                                    if (authResult) {
+                                        refreshBluetoothDevices();
+                                        for (String s : bluetoothPrinters.keySet()) {
+                                            deviceArr.put(s);
+                                        }
+                                        responseJson.put("printers", deviceArr);
+                                    }
+
                                 }
                                 if (action.equals("printraw")) {
                                     byte[] data = Base64.decode(request.getString("data"), Base64.DEFAULT);
@@ -344,7 +377,7 @@ public class RelayService extends Service {
                                             if (!authResult) {
                                                 IntentFilter filter = new IntentFilter(UsbReceiver.ACTION_USB_PERMISSION);
                                                 registerReceiver(new UsbReceiver(), filter);
-                                                usbManager.requestPermission(printer, PendingIntent.getBroadcast(RelayService.this, 0, new Intent(UsbReceiver.ACTION_USB_PERMISSION), android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0));
+                                                usbManager.requestPermission(printer, PendingIntent.getBroadcast(RelayService.this, 0, new Intent(UsbReceiver.ACTION_USB_PERMISSION), Build.VERSION.SDK_INT >= Build.VERSION_CODES.S ? PendingIntent.FLAG_MUTABLE : 0));
                                                 synchronized (authLock) {
                                                     try {
                                                         authLock.wait();
